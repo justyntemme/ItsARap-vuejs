@@ -1,11 +1,206 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>itsarap</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- jquery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <!-- jQuery Crypt -->
+    <script src="http://www.itsyndicate.ca/gssi/jquery/jquery.crypt.js"></script>
+ 
+    <title>itsARap</title>
+
+    <!-- custom CSS -->
+    <link rel="stylesheet" href="./css/style.css">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
   </head>
+
+
+
+  <!-- Main body of app -->
   <body>
-    <div id="app"></div>
-    <!-- built files will be auto injected -->
+
+    <div id="app">
+        <div v-if='!isLoggedIn' class='card col-sm-6 col-xsm-12 col-md-3 col-lg-3'>
+            <!-- Login Form  -->
+            <form class="loginForm">
+                <input v-model="username" type="text" id="username" class="form-control" placeholder="Username">
+                <input v-model="password" type="password" id="password" class="form-control" placeholder="password">
+            </form>
+            <button v-on:click="login" class="btn btn-info">Login</button>
+            <div v-if="showCreateUser" class='card col-sm-6 col-xsm-12 col-md-3 col-lg-3'>
+            <form class="createForm">
+                <input v-model="newUsername" type="text" id="newUsername" class="form-control" placeholder="Username">
+                <input v-model="newPassword" type="text" id="newPassword" class="form-control" placeholder="Password">
+                
+
+            </form>
+            <button v-on:click="createUser" class=" btn btn-info">Create</button>
+            </div>
+            <button v-on:click="setShowCreateUser" v-if="!showCreateUser" class="btn btn-info form-control">Create User</button>
+        </div>
+        
+
+ 
+        <form v-if="isLoggedIn" class="submitTrack">
+            <input v-model="trackName" type="text" class="form-control" placeholder="Track Name">
+            <input v-model="trackURL" type="text" class="form-control" placeholder="SoundcloudURL">
+        </form>
+        <button v-if="isLoggedIn" class="btn btn-info col-sm-12 col-md-6 col-sm-3">Upload</button>
+        <div class='card col-sm-12 col-md-3 col-lg-6'>
+            <!-- TODO implament vuejs v-for -->
+            <div v-for="(item,key,index) in IPuser_Name">
+                <hr>
+               
+                {{item}}
+                <br>
+                {{IPpost_Title[key]}}
+                <br>
+                <a v-bind:href="IPsoundcloud_URL[key]">Souncloud URL</a>
+                
+            </div>
+        </div>
+  
+  
+
+
+
+
+
+
+    
+<!-- Logout Button -->
+  
+        <button v-on:click="deleteUserSession" v-if="isLoggedIn" class="btn btn-info col-sm-12 col-md-3 col-lg-6">Logout</button>
+        </div>
   </body>
+<!-- VueJS -->
+ <script src="https://unpkg.com/vue"></script>
+  <script>
+    var app = new Vue({
+      el: '#app',
+      mounted:function() {
+          this.sessionID = this.readCookie("userSession");
+          if (this.sessionID != undefined || this.sessionID != "") {
+              this.isLoggedIn = true;
+          }
+          this.loadPosts();
+      },
+      data: {
+          sessionID: "notSet",
+          isLoggedIn: false,
+          username: "",
+          password: "",
+//IPOSTS
+          IPuser_Name: [],
+          IPpost_Title: [],
+          IPpost_ID: [],
+          IPcomment: [],
+          IPsoundcloud_URL: [],
+//END IPOST
+
+
+
+          newUsername: "",
+          newPassword: "",
+          showCreateUser: false,
+        
+      },
+      methods: {
+          deleteUserSession: function() {
+            app.createCookie("userSession", "",-1)
+            app.isLoggedIn = false;
+         
+          },
+          createUser: function() {
+            var hashedPass = jQuery().crypt({method: "md5", source: newPassword});
+            var http= new XMLHttpRequest();
+            var url = 'http://localhost:8080/user';
+            var data = JSON.stringify({user_Name:this.newUsername,user_Pass:hashedPass});
+   
+            http.open('POST', url, true);
+            http.onreadystatechange = function() {
+                if (http.readyState == XMLHttpRequest.DONE) {
+                    //Handle http request response
+
+                }
+
+            }
+
+            http.setRequestHeader("Content-type", "application/json");
+            http.send(data);
+
+          },
+          login: function() {
+              var hashedPass = jQuery().crypt({method: "md5", source: password});
+              var http= new XMLHttpRequest();
+              var url = 'http://localhost:8080/login';
+              var data = JSON.stringify({user_Name:this.username,user_Pass:hashedPass});
+              http.onreadystatechange = function() {
+                  if ( http.readyState == XMLHttpRequest.DONE) {
+                      var jsonResponse = JSON.parse(http.responseText);
+                      this.sessionID = jsonResponse.user_ID;
+                      app.createCookie("userSession",this.sessionID,"1");
+                      app.isLoggedIn = true;
+                  }
+              }
+              http.open('POST', url, true);
+              http.setRequestHeader("Content-type", "application/json");
+              http.send(data);
+              },
+          loadPosts: function() {
+              var http = new XMLHttpRequest();
+              var url = 'http://localhost:8080/posts';
+              http.onreadystatechange = function() {
+              if ( http.readyState == XMLHttpRequest.DONE) {
+                  var jsonResponse = JSON.parse(http.responseText);
+                  jsonResponse.forEach(function(element, position){
+                    app.IPuser_Name.push(element.user_Id);
+                    app.IPpost_Title.push(element.post_Title);
+                    app.IPpost_ID.push(element.post_Id);
+                    app.IPsoundcloud_URL.push(element.soundcloud_URL);
+                    
+                  })
+              }
+                                 
+
+              }
+              http.open('GET', url, true);
+              http.setRequestHeader("Content-type", "application/json");
+              http.send();
+        
+          },
+          setShowCreateUser: function() {
+              this.showCreateUser = !(this.showCreateUser);
+          },
+          disableShowCreateUser: function() {
+              showCreateUser = false;
+              alert(showCreateUser);
+          },
+          createCookie: function(name,value,days) {
+	        if (days) 
+            {
+		        var date = new Date();
+		        date.setTime(date.getTime()+(days*24*60*60*1000));
+		        var expires = "; expires="+date.toGMTString();
+	        }
+	            else var expires = "";
+	            document.cookie = name+"="+value+expires+"; path=/";
+            },
+           readCookie: function(name) {
+	            var nameEQ = name + "=";
+	            var ca = document.cookie.split(';');
+	            for(var i=0;i < ca.length;i++) {
+		            var c = ca[i];
+		        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+		            if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+	            }
+	            return null;
+            },
+      }
+    })
+  </script>
 </html>

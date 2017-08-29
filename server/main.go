@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/justyntemme/itsaRap/server/restAPI"
+	"github.com/justyntemme/ItsARap-vuejs/server/restAPI"
 )
 
 func main() {

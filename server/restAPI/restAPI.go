@@ -138,6 +138,8 @@ func (uc UserController) GetAllPosts(w http.ResponseWriter, r *http.Request, p h
 //GetUser grabs user by id
 func (uc UserController) GetUser(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	//grab id
+	stringid := p.ByName("id")
+	fmt.Println(stringid)
 	id := p.ByName("id")
 	//Verify id is ObjectId hex rep
 
@@ -219,6 +221,7 @@ func (uc UserController) CreateUser(w http.ResponseWriter, r *http.Request, _ ht
 	result := User{}
 
 	json.NewDecoder(r.Body).Decode(&u)
+	fmt.Print("User: ")
 	fmt.Println(u)
 
 	//Create bson ID
