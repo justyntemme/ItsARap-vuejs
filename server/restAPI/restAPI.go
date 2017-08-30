@@ -37,7 +37,16 @@ type Ipost struct {
 	SoundcloudURL string          `json:"soundcloud_URL" bson:"soundcloud_url"`
 }
 
-///LyricReply struct holds the information for all recordings to user recording reply
+//TextReply struct holds the data for every comment to a post
+type TextReply struct {
+	PIPId         bson.ObjectId `json:"bPIPId" bson:"bPIPId"`
+	UserID        bson.ObjectId `json:"buser_Id" bson:"buser_Id"`
+	TextReplyText string        `json:"text_reply_text" bson:"text_reply_text"`
+	TPPId         string        `json:"PPId" bson:"PPId"`
+	TUserID       string        `json:"user_Id" bson:"user_Id"`
+}
+
+//LyricReply struct holds the information for all recordings to user recording reply
 type LyricReply struct {
 	UserID       bson.ObjectId `json:"user_Id" bson:"user_Id"`
 	FileID       bson.ObjectId `json:"file_Id" bson:"file_Id"`
@@ -63,6 +72,8 @@ func Run() {
 	r.POST("/login", uc.Login)
 	r.GET("/posts", uc.GetAllPosts)
 	r.POST("/lreply", uc.uploadReply)
+	r.GET("/comments", uc.GetComments)
+	r.POST("/comments", uc.CreateComment)
 
 	fmt.Println(http.ListenAndServe("localhost:8080", handler))
 
@@ -71,9 +82,19 @@ func Run() {
 func optionsHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Param) {
 }
 
-//GetReplys shows replys to a spacific post and returns json serialized string TODO
-func (us UserController) GetReplys(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-
+//GetComments shows replys to a spacific post and returns json serialized string TODO
+func (uc UserController) GetComments(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	id := p.ByName("id")
+	fmt.Println(id)
+	bid := bson.ObjectIdHex(id)
+	reply := []TextReply{}
+	_ = uc.session.DB("its-a-rap-db").C("treply").Find(bid).All(&reply)
+	pj, err := json.Marshal(reply)
+	if err != nil {
+		fmt.Println(err)
+	}
+	w.Header().Set("content-type", "application-json")
+	fmt.Fprintf(w, "%s\n", pj)
 }
 
 //uploadReply uploads user reply to an original post TODO
@@ -87,7 +108,6 @@ func (uc UserController) uploadReply(w http.ResponseWriter, r *http.Request, p h
 		fmt.Println(err)
 		return
 	}
-
 	uploadDir := path.Join(currentDirectory(), "uploads")
 	filename := path.Join(uploadDir, handler.Filename)
 	outfile, err := os.Create(filename)
@@ -110,12 +130,10 @@ func (uc UserController) uploadReply(w http.ResponseWriter, r *http.Request, p h
 	//w.Header().Set("Content-type", "application-json")
 	//w.Header().Set("Access-Control-Allow-Origin", "true")
 	fmt.Fprintf(w, "200OK")
-
 }
 
 // Returns the current directory we are running in.
 func currentDirectory() string {
-
 	// Locate the current directory for the site.
 	_, fn, _, _ := runtime.Caller(1)
 	return path.Dir(fn)
@@ -126,7 +144,6 @@ func (uc UserController) GetAllPosts(w http.ResponseWriter, r *http.Request, p h
 	posts := []Ipost{}
 	_ = uc.session.DB("its-a-rap-db").C("iposts").Find(bson.M{}).All(&posts)
 	fmt.Println(posts)
-
 	pj, err := json.Marshal(posts)
 	if err != nil {
 		fmt.Println(err)
@@ -213,6 +230,20 @@ func (uc UserController) CreateIPost(w http.ResponseWriter, r *http.Request, _ h
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.WriteHeader(http.StatusCreated)
 	fmt.Fprintf(w, "%s\n", ipj)
+}
+
+func (uc UserController) CreateComment(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	tp := TextReply{}
+
+	json.NewDecoder(r.Body).Decode(&tp)
+	fmt.Println(bson.IsObjectIdHex(tp.TPPId))
+	tp.PIPId = bson.ObjectIdHex(tp.TPPId)
+	tp.UserID = bson.ObjectIdHex(tp.TUserID)
+	fmt.Println(tp)
+	err := uc.session.DB("its-a-rap-db").C("treply").Insert(tp)
+	if err != nil {
+		fmt.Println(err)
+	}
 }
 
 //CreateUser creates a user entry in the mongoDB
