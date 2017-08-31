@@ -124,7 +124,7 @@
           },
           getUsername: function(user_id) {
                 var http=new XMLHttpRequest();
-                var url= ('http://wichitaRapBackend.nextwavesolutions.io/user?id=' + user_id);
+                var url= ('http://wichitaRap.nextwavesolutions.io:8080/user?id=' + user_id);
                 http.open('GET',url,true);
                 http.onreadystatechange = function() {
                     if (http.readyState = XMLHttpRequest.DONE) {
@@ -139,7 +139,7 @@
             this.$set(app.showComments, post_id, true)
             //nice hacking justyn! keep this little trick up your sleeve!
             var http = new XMLHttpRequest();
-            var url = ('http://wichitaRapBackend.nextwavesolutions.io/comments?id=' + post_id);
+            var url = ('http://wichitaRap.nextwavesolutions.io:8080/comments?id=' + post_id);
             http.open('GET', url, true);
             http.onreadystatechange = function() {
                 if (http.readyState = XMLHttpRequest.DONE) {
@@ -155,7 +155,7 @@
           },
           createComment: function(PPId) {
             var http=new XMLHttpRequest();
-            var url = 'http://wichitaRapBackend.nextwavesolutions.io/comments'
+            var url = 'http://wichitaRap.nextwavesolutions.io:8080/comments'
      
             var data = JSON.stringify({"PPId":PPId, "user_Id":app.readCookie("userSession"),"text_reply_text":app.replyText})
          
@@ -166,7 +166,7 @@
           createUser: function() {
             var hashedPass = jQuery().crypt({method: "md5", source: newPassword});
             var http= new XMLHttpRequest();
-            var url = 'http://wichitaRapBackend.nextwavesolutions.io/user';
+            var url = 'http://wichitaRap.nextwavesolutions.io:8080/user';
             var data = JSON.stringify({user_Name:this.newUsername,user_Pass:hashedPass});
    
             http.open('POST', url, true);
@@ -184,7 +184,7 @@
           login: function() {
               var hashedPass = jQuery().crypt({method: "md5", source: password});
               var http= new XMLHttpRequest();
-              var url = 'http://wichitaRapBackend.nextwavesolutions.io/login';
+              var url = 'http://wichitaRap.nextwavesolutions.io:8080/login';
               var data = JSON.stringify({user_Name:this.username,user_Pass:hashedPass});
               http.onreadystatechange = function() {
                   if ( http.readyState == XMLHttpRequest.DONE) {
@@ -200,7 +200,7 @@
               },
           loadPosts: function() {
               var http = new XMLHttpRequest();
-              var url = 'http://wichitaRapBackend.nextwavesolutions.io/posts';
+              var url = 'http://wichitaRap.nextwavesolutions.io:8080/posts';
               http.onreadystatechange = function() {
               if ( http.readyState == XMLHttpRequest.DONE) {
                   var jsonResponse = JSON.parse(http.responseText);
