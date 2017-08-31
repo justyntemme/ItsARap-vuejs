@@ -8,21 +8,15 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <!-- jQuery Crypt -->
     <script src="http://www.itsyndicate.ca/gssi/jquery/jquery.crypt.js"></script>
- 
     <title>itsARap</title>
-
     <!-- custom CSS -->
     <link rel="stylesheet" href="./css/style.css">
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
   </head>
-
-
-
   <!-- Main body of app -->
   <body>
-
     <div id="app">
         <div v-if='!isLoggedIn' class='card col-sm-6 col-xsm-12 col-md-3 col-lg-3'>
             <!-- Login Form  -->
@@ -35,8 +29,6 @@
             <form class="createForm">
                 <input v-model="newUsername" type="text" id="newUsername" class="form-control" placeholder="Username">
                 <input v-model="newPassword" type="text" id="newPassword" class="form-control" placeholder="Password">
-                
-
             </form>
             <button v-on:click="createUser" class=" btn btn-info">Create</button>
             </div>
@@ -54,26 +46,38 @@
             <!-- TODO implament vuejs v-for -->
             <div v-for="(item,key,index) in IPuser_Name">
                 <hr>
-               
-                {{item}}
+                <h2>{{item}}</h2>
                 <br>
                 {{IPpost_Title[key]}}
+       
                 <br>
-                <a v-bind:href="IPsoundcloud_URL[key]">Souncloud URL</a>
+                <a v-bind:href="IPsoundcloud_URL[key]">Listen On Soundcloud</a>
+                <br>
+                <input v-if="isLoggedIn" v-model="replyText" type=text> <button v-if="isLoggedIn" v-on:click="createComment(IPpost_ID[key])">Reply</button>
+                <br>
+                 <button v-on:click="getComments(IPpost_ID[key])" class="btn" >Show Comments</button> 
+                <button v-on:click="hideComments(IPpost_ID[key])" class="btn" >Hide Comments </button>
                 
+                <div v-for="(item,keykey,index) in comments[IPpost_ID[key]] "v-show="showComments[IPpost_ID[key]]">
+
+                  
+                    {{getUsername(comments[IPpost_ID[key]][keykey].user_Id)}}
+                    <br>
+                    {{comments[IPpost_ID[key]][keykey].text_reply_text}}
+                    <hr>
+                    <button v-on:click="getUsername(comments[IPpost_ID[key]][keykey].user_Id)">username</button
+
+                    
+
+
+                </div>
             </div>
         </div>
   
   
 
 
-
-
-
-
-    
 <!-- Logout Button -->
-  
         <button v-on:click="deleteUserSession" v-if="isLoggedIn" class="btn btn-info col-sm-12 col-md-3 col-lg-6">Logout</button>
         </div>
   </body>
@@ -90,10 +94,13 @@
           this.loadPosts();
       },
       data: {
+          comments: {},
+          showComments: {},
           sessionID: "notSet",
           isLoggedIn: false,
           username: "",
           password: "",
+          replyText: "",
 //IPOSTS
           IPuser_Name: [],
           IPpost_Title: [],
@@ -101,9 +108,6 @@
           IPcomment: [],
           IPsoundcloud_URL: [],
 //END IPOST
-
-
-
           newUsername: "",
           newPassword: "",
           showCreateUser: false,
@@ -115,6 +119,50 @@
             app.isLoggedIn = false;
          
           },
+          hideComments: function(post_id){
+                this.$set(app.showComments, post_id, false)
+          },
+          getUsername: function(user_id) {
+                var http=new XMLHttpRequest();
+                var url= ('http://localhost:8080/user?id=' + user_id);
+                http.open('GET',url,true);
+                http.onreadystatechange = function() {
+                    if (http.readyState = XMLHttpRequest.DONE) {
+                        alert(http.responseText)
+                        return(http.responseText)
+                    }
+                }
+                http.setRequestHeader("Content-type", "application/json")
+                http.send()
+          },
+          getComments: function(post_id) {
+            this.$set(app.showComments, post_id, true)
+            //nice hacking justyn! keep this little trick up your sleeve!
+            var http = new XMLHttpRequest();
+            var url = ('http://localhost:8080/comments?id=' + post_id);
+            http.open('GET', url, true);
+            http.onreadystatechange = function() {
+                if (http.readyState = XMLHttpRequest.DONE) {
+                    
+                    //handle response
+                var jsonResponse = JSON.parse(http.responseText);
+           
+                Vue.set(app.comments, post_id, jsonResponse)
+                }
+            }
+            http.setRequestHeader("Content-type", "application/json");
+            http.send();
+          },
+          createComment: function(PPId) {
+            var http=new XMLHttpRequest();
+            var url = 'http://localhost:8080/comments'
+     
+            var data = JSON.stringify({"PPId":PPId, "user_Id":app.readCookie("userSession"),"text_reply_text":app.replyText})
+         
+            http.open('POST', url, true);
+            http.setRequestHeader("Content-type", "application/json");
+            http.send(data);
+          },
           createUser: function() {
             var hashedPass = jQuery().crypt({method: "md5", source: newPassword});
             var http= new XMLHttpRequest();
@@ -125,7 +173,6 @@
             http.onreadystatechange = function() {
                 if (http.readyState == XMLHttpRequest.DONE) {
                     //Handle http request response
-
                 }
 
             }
