@@ -108,6 +108,8 @@
           IPcomment: [],
           IPsoundcloud_URL: [],
 //END IPOST
+          trackName: "",
+          trackURL: "",
           newUsername: "",
           newPassword: "",
           showCreateUser: false,
@@ -121,6 +123,20 @@
           },
           hideComments: function(post_id){
                 this.$set(app.showComments, post_id, false)
+          },
+          postTrack: function() {
+            var http= new XMLHttpRequest();
+            var url = ('http://wichitaRap.nextwavesolutions.io:8080/posts')
+            //var data = JSON.stringify({"PPId":PPId, "user_Id":app.readCookie("userSession"),"text_reply_text":app.replyText})
+            var data = JSON.stringify({"user_ID":app.readCookie("userSession"),"post_Title":app.trackName,"soundcloud_URL":app.trackURL})
+            http.open('POST', url, true)
+            http.onreadystatechange = function() {
+                if (http.readyState = XMLHttpRequest.DONE) {
+                    alert("Track Submitted");
+                }
+            }
+            http.setRequestHeader("Content-type", "applications/json")
+            http.send(data)
           },
           getUsername: function(user_id) {
                 var http=new XMLHttpRequest();
