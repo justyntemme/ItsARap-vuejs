@@ -41,7 +41,7 @@
             <input v-model="trackName" type="text" class="form-control" placeholder="Track Name">
             <input v-model="trackURL" type="text" class="form-control" placeholder="SoundcloudURL">
         </form>
-        <button v-if="isLoggedIn" class="btn btn-info col-sm-12 col-md-6 col-sm-3">Upload</button>
+        <button v-if="isLoggedIn" v-on:click="postTrack" class="btn btn-info col-sm-12 col-md-6 col-sm-3">Upload</button>
         <div class='card col-sm-12 col-md-3 col-lg-6'>
             <!-- TODO implament vuejs v-for -->
             <div v-for="(item,key,index) in IPuser_Name">
