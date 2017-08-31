@@ -77,7 +77,7 @@ func Run() {
 	r.POST("/comments", uc.CreateComment)
 	r.GET("/user", uc.GetUser)
 
-	log.Fatal(http.ListenAndServe("localhost:8080", handler))
+	log.Fatal(http.ListenAndServe("162.243.135.241:8080", handler))
 
 }
 
