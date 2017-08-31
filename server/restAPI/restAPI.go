@@ -74,6 +74,7 @@ func Run() {
 	r.POST("/lreply", uc.uploadReply)
 	r.GET("/comments", uc.GetComments)
 	r.POST("/comments", uc.CreateComment)
+	r.GET("/user", uc.GetUser)
 
 	fmt.Println(http.ListenAndServe("localhost:8080", handler))
 
@@ -84,11 +85,10 @@ func optionsHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Param) 
 
 //GetComments shows replys to a spacific post and returns json serialized string TODO
 func (uc UserController) GetComments(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	id := p.ByName("id")
-	fmt.Println(id)
-	bid := bson.ObjectIdHex(id)
+	id := r.URL.Query()["id"]
+	//bid := bson.ObjectIdHex(id[0])
 	reply := []TextReply{}
-	_ = uc.session.DB("its-a-rap-db").C("treply").Find(bid).All(&reply)
+	_ = uc.session.DB("its-a-rap-db").C("treply").Find(bson.M{"PPId": id[0]}).Sort("-timestamp").All(&reply)
 	pj, err := json.Marshal(reply)
 	if err != nil {
 		fmt.Println(err)
@@ -99,7 +99,6 @@ func (uc UserController) GetComments(w http.ResponseWriter, r *http.Request, p h
 
 //uploadReply uploads user reply to an original post TODO
 func (uc UserController) uploadReply(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	fmt.Println("Well we at least hit the handler...")
 	l := LyricReply{}
 	fmt.Println(r.MultipartForm.File)
 
@@ -143,7 +142,6 @@ func currentDirectory() string {
 func (uc UserController) GetAllPosts(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	posts := []Ipost{}
 	_ = uc.session.DB("its-a-rap-db").C("iposts").Find(bson.M{}).All(&posts)
-	fmt.Println(posts)
 	pj, err := json.Marshal(posts)
 	if err != nil {
 		fmt.Println(err)
@@ -155,32 +153,26 @@ func (uc UserController) GetAllPosts(w http.ResponseWriter, r *http.Request, p h
 //GetUser grabs user by id
 func (uc UserController) GetUser(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	//grab id
-	stringid := p.ByName("id")
-	fmt.Println(stringid)
-	id := p.ByName("id")
+	id := r.URL.Query()["id"]
 	//Verify id is ObjectId hex rep
-
-	if !bson.IsObjectIdHex(id) {
-		w.WriteHeader(http.StatusNotFound) //404
-		return
-	}
-
-	oid := bson.ObjectIdHex(id)
 
 	//composite literal
 	u := User{}
-
+	u.ID = bson.ObjectIdHex(id[0])
 	//Fetch user by id
-	if err := uc.session.DB("its-a-rap-db").C("users").FindId(oid).One(&u); err != nil {
+	err := uc.session.DB("its-a-rap-db").C("users").Find(bson.M{"User_ID": u.ID}).One(&r)
+	if err != nil {
 		w.WriteHeader(404)
 		return
 	}
 
 	//marshal provided interface
+
 	uj, _ := json.Marshal(u)
 
 	w.Header().Set("Content-type", "application/json")
 	w.WriteHeader(http.StatusOK) // 200
+	fmt.Println(uj)
 	fmt.Fprintf(w, "%s\n", uj)
 }
 
@@ -190,7 +182,6 @@ func (uc UserController) Login(w http.ResponseWriter, r *http.Request, _ httprou
 	result := User{}
 
 	json.NewDecoder(r.Body).Decode(&u)
-	fmt.Println(u)
 
 	err := uc.session.DB("its-a-rap-db").C("users").Find(bson.M{"user_name": u.Name}).One(&result)
 	if err != nil {
@@ -215,7 +206,6 @@ func (uc UserController) CreateIPost(w http.ResponseWriter, r *http.Request, _ h
 	ip := Ipost{}
 
 	json.NewDecoder(r.Body).Decode(&ip)
-	fmt.Println(ip)
 
 	//create bson id
 	ip.PostID = bson.NewObjectId()
@@ -236,10 +226,8 @@ func (uc UserController) CreateComment(w http.ResponseWriter, r *http.Request, _
 	tp := TextReply{}
 
 	json.NewDecoder(r.Body).Decode(&tp)
-	fmt.Println(bson.IsObjectIdHex(tp.TPPId))
 	tp.PIPId = bson.ObjectIdHex(tp.TPPId)
 	tp.UserID = bson.ObjectIdHex(tp.TUserID)
-	fmt.Println(tp)
 	err := uc.session.DB("its-a-rap-db").C("treply").Insert(tp)
 	if err != nil {
 		fmt.Println(err)
@@ -253,7 +241,6 @@ func (uc UserController) CreateUser(w http.ResponseWriter, r *http.Request, _ ht
 
 	json.NewDecoder(r.Body).Decode(&u)
 	fmt.Print("User: ")
-	fmt.Println(u)
 
 	//Create bson ID
 	u.ID = bson.NewObjectId()
