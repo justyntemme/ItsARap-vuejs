@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"path"
@@ -76,7 +77,7 @@ func Run() {
 	r.POST("/comments", uc.CreateComment)
 	r.GET("/user", uc.GetUser)
 
-	fmt.Println(http.ListenAndServe("localhost:8080", handler))
+	log.Fatal(http.ListenAndServe("localhost:8080", handler))
 
 }
 
