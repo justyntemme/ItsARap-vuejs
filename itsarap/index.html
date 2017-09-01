@@ -96,6 +96,7 @@
       },
       data: {
           comments: {},
+          
           showComments: {},
           sessionID: "",
           isLoggedIn: false,
@@ -148,7 +149,8 @@
                     if (http.readyState = XMLHttpRequest.DONE) {
                         var jsonResponse = JSON.parse(http.responseText)
                         console.log(jsonResponse.user_Name)
-                        return(jsonResponse.user_Name)
+                        //return(jsonResponse.user_Name)
+                        return("success")
                     }
                 }
                 http.setRequestHeader("Content-type", "application/json")
