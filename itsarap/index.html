@@ -150,7 +150,7 @@
                     if (http.readyState = XMLHttpRequest.DONE) {
                         var jsonResponse = JSON.parse(http.responseText)
                         console.log(jsonResponse.user_Name)
-                        this.$set(app.comments, user_id, jsonResponse.user_Name)
+                        Vue.set(app.comments, user_id, jsonResponse.user_Name)
                         
                     }
                 }
