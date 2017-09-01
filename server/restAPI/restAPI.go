@@ -161,7 +161,7 @@ func (uc UserController) GetUser(w http.ResponseWriter, r *http.Request, p httpr
 	u := User{}
 	u.ID = bson.ObjectIdHex(id[0])
 	//Fetch user by id
-	err := uc.session.DB("its-a-rap-db").C("users").Find(bson.M{"User_ID": u.ID}).One(&r)
+	err := uc.session.DB("its-a-rap-db").C("users").Find(bson.M{"User_ID": u.ID}).One(&u)
 	if err != nil {
 		w.WriteHeader(404)
 		return
