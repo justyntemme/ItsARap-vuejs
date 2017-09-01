@@ -147,8 +147,8 @@
                     if (http.readyState = XMLHttpRequest.DONE) {
                         var jsonResponse = JSON.parse(http.responseText)
        
-                        alert(http.jsonResponse)
-                        return(http.jsonResponse.user_Name)
+                        alert(jsonResponse)
+                        return(jsonResponse.user_Name)
                     }
                 }
                 http.setRequestHeader("Content-type", "application/json")
