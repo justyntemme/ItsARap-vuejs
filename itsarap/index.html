@@ -46,7 +46,7 @@
             <!-- TODO implament vuejs v-for -->
             <div v-for="(item,key,index) in IPuser_Name">
                 <hr>
-                <h2>{{getUsername(comments[IPpost_ID[key].user_Id}}</h2>
+                <h2>{{getUsername(IPuser_Name[key])}}</h2>
                 <br>
                 {{IPpost_Title[key]}}
        
@@ -60,7 +60,7 @@
                 
                 <div v-for="(item,keykey,index) in comments[IPpost_ID[key]] "v-show="showComments[IPpost_ID[key]]">
 
-                  
+                
                     {{getUsername(comments[IPpost_ID[key]][keykey].user_Id)}}
                     <br>
                     {{comments[IPpost_ID[key]][keykey].text_reply_text}}
