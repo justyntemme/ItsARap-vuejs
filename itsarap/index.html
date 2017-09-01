@@ -169,6 +169,7 @@
                     
                     //handle response
                 var jsonResponse = JSON.parse(http.responseText);
+                console.log(jsonResponse)
            
                 Vue.set(app.comments, post_id, jsonResponse)
                 }
