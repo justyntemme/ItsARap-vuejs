@@ -113,6 +113,7 @@
           newUsername: "",
           newPassword: "",
           showCreateUser: false,
+          actualUsername: "",
         
       },
       methods: {
@@ -145,7 +146,8 @@
                 http.onreadystatechange = function() {
                     if (http.readyState = XMLHttpRequest.DONE) {
                         var jsonResponse = JSON.parse(http.responseText)
-                        return(http.responseText.user_Name)
+                        app.actualUsername = http.jsonResponse.user_Name
+                        return(http.jsonResponse.user_Name)
                     }
                 }
                 http.setRequestHeader("Content-type", "application/json")
