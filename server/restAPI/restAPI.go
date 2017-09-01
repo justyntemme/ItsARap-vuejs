@@ -170,6 +170,7 @@ func (uc UserController) GetUser(w http.ResponseWriter, r *http.Request, p httpr
 	//marshal provided interface
 
 	uj, _ := json.Marshal(u)
+	fmt.Println(uj)
 
 	w.Header().Set("Content-type", "application/json")
 	w.WriteHeader(http.StatusOK) // 200
