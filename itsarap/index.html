@@ -65,7 +65,7 @@
                     <br>
                     {{comments[IPpost_ID[key]][keykey].text_reply_text}}
                     <hr>
-                    <button v-on:click="getUsername(comments[IPpost_ID[key]][keykey].user_Id)">username</button
+                    <button v-on:click="getUsername(comments[IPpost_ID[key]][keykey].user_Id)">username</button>
 
                     
 
@@ -147,8 +147,8 @@
                     if (http.readyState = XMLHttpRequest.DONE) {
                         var jsonResponse = JSON.parse(http.responseText)
        
-                        alert(jsonResponse)
-                        alert(jsonResponse.user_Name)
+                        
+                        
                         return(jsonResponse.user_Name)
                     }
                 }
