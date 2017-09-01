@@ -63,6 +63,7 @@
 
                 
                     {{getUsername(comments[IPpost_ID[key]][keykey].user_Id)}}
+                    {{comments[comments[IPpost_ID[key]][keykey].user_Id].user_Name }}
                     <br>
                     {{comments[IPpost_ID[key]][keykey].text_reply_text}}
                     <hr>
@@ -149,8 +150,8 @@
                     if (http.readyState = XMLHttpRequest.DONE) {
                         var jsonResponse = JSON.parse(http.responseText)
                         console.log(jsonResponse.user_Name)
-                        //return(jsonResponse.user_Name)
-                        return("success")
+                        this.$set(app.comments, user_id, jsonResponse.user_Name)
+                        
                     }
                 }
                 http.setRequestHeader("Content-type", "application/json")
