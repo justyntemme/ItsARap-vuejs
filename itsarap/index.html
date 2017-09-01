@@ -144,8 +144,8 @@
                 http.open('GET',url,true);
                 http.onreadystatechange = function() {
                     if (http.readyState = XMLHttpRequest.DONE) {
-                        alert(http.responseText)
-                        return(http.responseText)
+                        var jsonResponse = JSON.parse(http.responseText)
+                        return(http.responseText.user_Name)
                     }
                 }
                 http.setRequestHeader("Content-type", "application/json")
